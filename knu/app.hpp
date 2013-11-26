@@ -1,0 +1,42 @@
+#ifndef KNU_APP
+#define KNU_APP
+
+#include <chrono>
+#include <knu/window2.hpp>
+#include <knu/gl_utility.hpp>
+#include <knu/mathlibrary5.hpp>
+
+#ifdef WIN32
+#define MAJOR_VERSION 4
+#define MINOR_VERSION 4
+#endif
+#ifdef __APPLE__
+#include <OpenGL/gl3.h>
+#define MAJOR_VERSION 3         // In sdl, for the time being, the only way to request a 4.1 context is
+#define MINOR_VERSION 2         // to request a 3.2 context on mac
+#endif
+
+void APIENTRY debug_output1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, void *userParam);
+class App
+{
+	Window window;
+	std::chrono::steady_clock::time_point currentTime, lastTime;
+	float clearColorVal[4];
+	float clearDepthVal;
+    knu::math::m4f defaultProjectionMatrix;
+
+private:
+	void general_setup();
+	void draw_scene();
+	void update(float seconds);
+	void initialize_graphics();
+	void process_messages(SDL_Event *event);
+	void resize(int w, int h);
+    void get_window_size(int &w, int &h);
+
+public:
+	App();
+	int run();
+};
+
+#endif
