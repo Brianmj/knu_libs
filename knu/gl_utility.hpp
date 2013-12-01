@@ -266,15 +266,15 @@ namespace knu
             {
                 computeString += computeSource;
             }
-            void make_program()
+            void make()
             {
                 // this function assumes strings have been loaded using fragment_shader_from_string etc functions
                 Shader properties;
-                make_program(properties);
+                make(properties);
             }
             
             
-            void make_program(Shader properties)
+            void make(Shader properties)
             {
                 // If either compute source or path is set, process that only as a compute program can only be in a program by itself
                 if(!properties.computeShaderPath.empty() || !properties.computeSource.empty())
@@ -320,11 +320,11 @@ namespace knu
             
         };
         
-        class Uniform_Buffer_Object
+        class UniformBufferObject
         {
             
         public:
-            Uniform_Buffer_Object():
+            UniformBufferObject():
             po(0),
             bkIndex(0),
             bindingIndex(0),
@@ -333,7 +333,7 @@ namespace knu
                 
             }
             
-            ~Uniform_Buffer_Object()
+            ~UniformBufferObject()
             {
                 if(!ub)
                 {
@@ -357,16 +357,27 @@ namespace knu
             }
             
             // Rebind this ubo to another program object
-            void rebind(GLuint programObject, GLuint bindingPoint)
+            void bind(GLuint programObject, GLuint bindingPoint)
             {
                 auto names = get_uniform_names();
                 resolve_indices(programObject, bkName, names);
                 bind_to_index(bindingPoint);
             }
             
-            void rebind(Program const &po, GLuint bindingPoint)
+            void bind(Program const &program, GLuint bindingPoint)
             {
-                rebind(po.get_id(), bindingPoint);
+                bind(program.get_id(), bindingPoint);
+            }
+            
+            void rebind(GLuint program)
+            {
+                po = program;
+                bind_to_index(bindingIndex);
+            }
+            void rebind(Program const &program)
+            {
+                po = program.get_id();
+                bind_to_index(bindingIndex);
             }
             
             void *map_buffer()

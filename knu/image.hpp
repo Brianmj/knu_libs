@@ -24,8 +24,8 @@ namespace knu
     {
         struct ImageData
         {
-            int w;
-            int h;
+            int width;
+            int height;
             int bitsPerPixel;
             int bytesPerPixel;
             int format;
@@ -51,11 +51,11 @@ namespace knu
             
             ImageData i;
             SDL_LockSurface(surface.get());
-            i.w = surface->w;
-            i.h = surface->h;
+            i.width = surface->w;
+            i.height = surface->h;
             i.bitsPerPixel = surface->format->BitsPerPixel;
             i.bytesPerPixel = surface->format->BytesPerPixel;
-            i.size = i.w * i.h * i.bytesPerPixel;
+            i.size = i.width * i.height * i.bytesPerPixel;
             
             if(i.bytesPerPixel == 4)
             {
@@ -94,8 +94,8 @@ namespace knu
             GLuint tex;
             glGenTextures(1, &tex);
             glBindTexture(GL_TEXTURE_2D, tex);
-            glTexStorage2D(GL_TEXTURE_2D, 1, (i.bytesPerPixel == 4) ? GL_RGBA8 : GL_RGB8, i.w, i.h);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, i.w, i.h, i.format, GL_UNSIGNED_BYTE, i.pixels.data());
+            glTexStorage2D(GL_TEXTURE_2D, 1, (i.bytesPerPixel == 4) ? GL_RGBA8 : GL_RGB8, i.width, i.height);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, i.width, i.height, i.format, GL_UNSIGNED_BYTE, i.pixels.data());
             return tex;
         }
         
