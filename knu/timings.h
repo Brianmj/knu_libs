@@ -5,6 +5,7 @@
 
 #include <chrono>
 #include <vector>
+#include <algorithm>
 
 namespace knu
 {
@@ -37,7 +38,7 @@ namespace knu
         Mpf():
         lastTime(std::chrono::high_resolution_clock::now()),
         currentTime(std::chrono::high_resolution_clock::now()),
-        aSecond(1)
+        aSecond(2)
         {
             totalTime = currentTime - lastTime;
             times.reserve(1000);
@@ -50,7 +51,18 @@ namespace knu
             if(totalTime >= aSecond)
             {
                 auto tt = std::accumulate(std::begin(times), std::end(times), std::chrono::duration<float, std::milli>());
+                
                 averageMs = (float)std::chrono::duration_cast<std::chrono::milliseconds>(tt).count() / times.size();
+                
+                auto maxi = std::max_element(std::begin(times), std::end(times));
+                auto mini = std::min_element(std::begin(times), std::end(times));
+                
+                if(maxi != std::end(times))
+                    high = *maxi;
+                
+                if(mini != std::end(times))
+                    low = *mini;
+                
                 times.clear();
                 totalTime = std::chrono::milliseconds(0);
             }
@@ -58,12 +70,15 @@ namespace knu
             lastTime = currentTime;
         }
         
+        float maximum_ms() const { return high.count(); }
+        float minimum_ms() const { return low.count(); }
         float average_ms() const { return averageMs; }
     private:
         std::chrono::high_resolution_clock::time_point lastTime, currentTime;
         std::chrono::seconds aSecond;
         std::chrono::high_resolution_clock::duration totalTime;
         float averageMs;
+        std::chrono::duration<float, std::milli> high, low;
         std::vector<std::chrono::duration<float, std::milli>> times;
     };
 }
