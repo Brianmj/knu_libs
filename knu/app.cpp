@@ -7,11 +7,8 @@ using namespace knu::math::utility;
 
 void App::general_setup()
 {
-	{
-		int w, h; window.get_window_size(w, h);	resize(w, h);
-	}
-
 	glEnable(GL_DEPTH_TEST);
+
 }
 
 void App::draw_scene()
@@ -23,6 +20,11 @@ void App::draw_scene()
 }
 
 void App::update(float seconds)
+{
+
+}
+
+void App::load_shaders()
 {
 
 }
@@ -71,6 +73,20 @@ void App::get_window_size(int &w, int &h)
 {
     window.get_window_size(w, h);
 }
+
+int App::window_width()
+{
+	int w, h;
+	get_window_size(w, h);
+	return w;
+}
+
+int App::window_height()
+{
+	int w, h;
+	get_window_size(w, h);
+	return h;
+}
 App::App()
 {
 	clearColorVal[0] = 0.1f; clearColorVal[1] = 0.2f; clearColorVal[2] = 0.4f; clearColorVal[3] = 1.0f;
@@ -110,6 +126,7 @@ void App::initialize_graphics()
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
+	int w, h; window.get_window_size(w, h);	resize(w, h);
 }
 
 void APIENTRY debug_output1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, void *userParam)

@@ -424,7 +424,7 @@ namespace knu
                 
                 if(GL_INVALID_INDEX == bkIndex) throw std::runtime_error("Unable to resolve block name: " + blockName);
                 
-                std::vector<char *> cnames(names.size());
+                std::vector<const GLchar *> cnames(names.size());
                 std::vector<GLuint> indices(names.size());
                 
                 for(std::size_t i = 0; i < names.size(); ++i)
@@ -445,7 +445,6 @@ namespace knu
                     nameIndexMap[names[i]] = p;
                 }
             }
-            
             
             void bind_to_index(GLuint bindingPoint)
             {

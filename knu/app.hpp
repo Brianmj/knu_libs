@@ -29,10 +29,13 @@ private:
 	void general_setup();
 	void draw_scene();
 	void update(float seconds);
+	void load_shaders();
 	void initialize_graphics();
 	void process_messages(SDL_Event *event);
 	void resize(int w, int h);
     void get_window_size(int &w, int &h);
+	int window_width();
+	int window_height();
 
 public:
 	App();
