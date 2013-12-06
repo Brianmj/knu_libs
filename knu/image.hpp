@@ -10,6 +10,7 @@
 #define sdl_particle_image_hpp
 
 #include <vector>
+#include <memory>
 
 #ifdef __APPLE__
 #include <SDL2_image/SDL_image.h>
@@ -17,6 +18,11 @@
 #include <OpenGL/gl3ext.h>
 #endif
 
+#ifdef WIN32
+#include <SDL_image.h>
+#include <GL/glew.h>
+#pragma comment(lib, "sdl2_image.lib")
+#endif
 
 namespace knu
 {
