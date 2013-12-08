@@ -70,7 +70,39 @@ namespace knu
             {
                 destroy();
             }
+
+			void create(std::string blockName, GLuint bindingIndex, GLsizei size, GLenum usage)
+			{
+				destroy();
+
+				bkName = blockName;
+				ubLength = size;
+
+				glGenBuffers(1, &ub);
+				glBindBuffer(GL_UNIFORM_BUFFER, ub);
+				glBufferData(GL_UNIFORM_BUFFER, size, nullptr, usage);
+				glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+				bind_to_base(bindingIndex);
+			}
             
+			void destroy()
+			{
+				if (ub)
+				{
+					glBindBuffer(GL_UNIFORM_BUFFER, 0);
+					glDeleteBuffers(1, &ub);
+				}
+
+				bIndex = 0;
+				ubLength = 0;
+			}
+
+			std::string block_name() const
+			{
+				return bkName;
+			}
+
             void *map_buffer()
             {
                 glBindBuffer(GL_UNIFORM_BUFFER, ub);
@@ -116,37 +148,6 @@ namespace knu
         private:
             
             friend Program;
-            
-            void create(GLuint bindingIndex, GLsizei size, GLenum usage)
-            {
-                destroy();
-                
-                ubLength = size;
-                
-                glGenBuffers(1, &ub);
-                glBindBuffer(GL_UNIFORM_BUFFER, ub);
-                glBufferData(GL_UNIFORM_BUFFER, size, nullptr, usage);
-                glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                
-                bind_to_base(bindingIndex);
-            }
-            
-            void destroy()
-            {
-                if(ub)
-                {
-                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
-                    glDeleteBuffers(1, &ub);
-                }
-                
-                bIndex = 0;
-                ubLength = 0;
-            }
-            
-            std::string block_name() const
-            {
-                return bkName;
-            }
             
             UniformInfo get_uniform_info(std::string uniformName)
             {
@@ -474,7 +475,7 @@ namespace knu
             
             void setup_uniform_buffer(UniformBuffer &buffer, std::string blockName, GLuint bindingIndex, GLsizei bufferSize, GLenum usage)
             {
-                buffer.create(bindingIndex, bufferSize, usage);
+                buffer.create(blockName, bindingIndex, bufferSize, usage);
                 buffer.set_block_properties(blockName, nameBlockMap[blockName].second.nameUniformMap);
             }
             
