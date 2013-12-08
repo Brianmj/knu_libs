@@ -136,6 +136,14 @@ namespace knu
             {
                 return bIndex;
             }
+
+			template<typename T> void set(int offset, T data)
+			{
+				if (!ub)
+					return;
+
+				do_update(offset, data);
+			}
         
             template<typename T> void set(std::string uniformName, T data)
             {
@@ -164,6 +172,11 @@ namespace knu
                 nameIndexMap = niMap;
             }
             
+			void do_update(int offset, knu::math::m4f const m)
+			{
+				glBindBuffer(GL_UNIFORM_BUFFER, ub);
+				glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(float)* 16, &m[0]);
+			}
             void do_update(UniformInfo ui, knu::math::m4f const m)
             {
                 int offset = ui.uniformOffset;
