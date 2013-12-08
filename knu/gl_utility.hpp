@@ -30,6 +30,21 @@ namespace knu
 {
     namespace gl
     {
+        class Program;
+        
+        struct UniformInfo
+        {
+            GLint uniformType;
+            GLint arrayStride;
+            GLint matrixStride;
+            GLint uniformOffset;
+        };
+        
+        struct UniformBlock
+        {
+            std::unordered_map<std::string, std::pair<GLint, UniformInfo>> nameUniformMap;
+        };
+        
         struct Shader
         {
             std::string computeSource;
@@ -42,6 +57,158 @@ namespace knu
             std::string geometryShaderPath;
             std::vector<std::string> uniforms;
             std::vector<std::string> attributes;
+        };
+        
+        class UniformBuffer
+        {
+        public:
+            UniformBuffer():
+            ub(0),
+            ubLength(0) {}
+            
+            ~UniformBuffer()
+            {
+                destroy();
+            }
+            
+            void *map_buffer()
+            {
+                glBindBuffer(GL_UNIFORM_BUFFER, ub);
+                return glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+            }
+            
+            void unmap_buffer()
+            {
+                glUnmapBuffer(GL_UNIFORM_BUFFER);
+            }
+            
+            // retrieves the offset of the uniform name in the uniform block
+            GLint offset(std::string uniformName)
+            {
+                UniformInfo ui = get_uniform_info(uniformName);
+                return ui.uniformOffset;
+            }
+            
+            GLuint buffer() const
+            {
+                return ub;
+            }
+            
+            void bind_to_base(int bindingIndex)
+            {
+                bIndex = bindingIndex;
+                glBindBufferBase(GL_UNIFORM_BUFFER, bIndex, ub);
+            }
+            
+            GLuint binding_index() const
+            {
+                return bIndex;
+            }
+        
+            template<typename T> void set(std::string uniformName, T data)
+            {
+                if(!ub)         // make sure we have a named uniform buffer
+                    return;
+                UniformInfo ui = get_uniform_info(uniformName);
+                do_update(ui, data);
+            }
+            
+        private:
+            
+            friend Program;
+            
+            void create(GLuint bindingIndex, GLsizei size, GLenum usage)
+            {
+                destroy();
+                
+                ubLength = size;
+                
+                glGenBuffers(1, &ub);
+                glBindBuffer(GL_UNIFORM_BUFFER, ub);
+                glBufferData(GL_UNIFORM_BUFFER, size, nullptr, usage);
+                glBindBuffer(GL_UNIFORM_BUFFER, 0);
+                
+                bind_to_base(bindingIndex);
+            }
+            
+            void destroy()
+            {
+                if(ub)
+                {
+                    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+                    glDeleteBuffers(1, &ub);
+                }
+                
+                bIndex = 0;
+                ubLength = 0;
+            }
+            
+            std::string block_name() const
+            {
+                return bkName;
+            }
+            
+            UniformInfo get_uniform_info(std::string uniformName)
+            {
+                auto i = nameIndexMap.find(uniformName);
+                if(i == std::end(nameIndexMap))
+                    throw std::runtime_error("Unable to find uniform name: " + uniformName + " in registered list");
+                
+                return i->second.second;
+            }
+            
+            void set_block_properties(std::string blockName, std::unordered_map<std::string, std::pair<GLint, UniformInfo>> niMap)
+            {
+                bkName = blockName;
+                nameIndexMap = niMap;
+            }
+            
+            void do_update(UniformInfo ui, knu::math::m4f const m)
+            {
+                int offset = ui.uniformOffset;
+                int stride = ui.matrixStride;
+                knu::math::v4f row = m.get_row_0();
+                
+                glBindBuffer(GL_UNIFORM_BUFFER, ub);
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v4f), &row.x);
+                
+                offset += stride;
+                row = m.get_row_1();
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v4f), &row.x);
+                
+                offset += stride;
+                row = m.get_row_2();
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v4f), &row.x);
+                
+                offset += stride;
+                row = m.get_row_3();
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v4f), &row.x);
+            }
+            
+            void do_update(UniformInfo ui, knu::math::m3f const m)
+            {
+                int offset = ui.uniformOffset;
+                int stride = ui.matrixStride;
+                knu::math::v3f row = m.get_row_0();
+                
+                glBindBuffer(GL_UNIFORM_BUFFER, ub);
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v3f), &row.x);
+                
+                offset += stride;
+                row = m.get_row_1();
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v3f), &row.x);
+                
+                offset += stride;
+                row = m.get_row_2();
+                glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(knu::math::v3f), &row.x);
+            }
+            
+        private:
+            GLuint                                                              ub;                     // uniform buffer
+            GLuint                                                              ubLength;
+            GLuint                                                              bIndex;                 // binding index
+            std::string                                                         bkName;
+            std::unordered_map<std::string, std::pair<GLint, UniformInfo>>       nameIndexMap;           // pairings between a string and an uniform index
         };
         
         class Program
@@ -59,6 +226,7 @@ namespace knu
             
             std::unordered_map<std::string, GLint> uniforms;
             std::unordered_map<std::string, GLint> attributes;
+            std::unordered_map<std::string, std::pair<GLuint, UniformBlock>> nameBlockMap;
             
             
         private:
@@ -191,6 +359,29 @@ namespace knu
             
             void build_compute(Shader properties)
             {
+                if(properties.computeShaderPath.empty() && properties.computeSource.empty() && computeString.empty())
+                    throw std::runtime_error("no compute shader");
+                
+                if(!properties.computeShaderPath.empty())
+                    computeString += read_file(properties.computeShaderPath);
+                
+                if(!properties.computeSource.empty())
+                    computeString += properties.computeSource;
+                
+#ifdef WIN32            // only supported on windows for now
+                computeShader = glCreateShader(GL_COMPUTE_SHADER);
+                const char *source = computeString.c_str();
+                GLint length = (GLint)computeString.size();
+                glShaderSource(computeShader, 1, &source, &length);
+#endif
+                try
+                {
+                    compile_shader(computeShader);
+                }catch(std::runtime_error &e)
+                {
+                    std::cout << e.what() << std::endl;
+                    throw std::runtime_error(std::string("Compute Shader: ") + e.what());
+                }
                 
             }
             
@@ -208,6 +399,83 @@ namespace knu
                               {
                                   attributes[a] = glGetAttribLocation(object, a.c_str());
                               });
+            }
+            
+            GLint get_block_index(std::string blockName)
+            {
+                GLint index = glGetUniformBlockIndex(object, blockName.c_str());
+                if(GL_INVALID_INDEX == index)
+                    throw std::runtime_error("unable to get index for: " + blockName);
+                
+                return index;
+            }
+            
+            void find_block_in_program(std::string blockName)
+            {
+                GLuint index = get_block_index(blockName);
+                if(GL_INVALID_INDEX == index)
+                    throw std::runtime_error(std::string("Invalid block name:") + blockName);
+                
+                nameBlockMap[blockName] = std::make_pair(index, UniformBlock());
+                
+            }
+            
+            GLint retrieve_block_info(std::string blockName)
+            {
+                auto iter = nameBlockMap.find(blockName);
+                GLuint index = iter->second.first;
+                UniformBlock block = iter->second.second;
+                
+                GLint blockSize = 0;
+                glGetActiveUniformBlockiv(object, index, GL_UNIFORM_BLOCK_DATA_SIZE, &blockSize);
+                
+                GLint activeUniformsCount = 0;
+                glGetActiveUniformBlockiv(object, index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &activeUniformsCount);
+                
+                std::vector<GLint> indicesList(activeUniformsCount);
+                glGetActiveUniformBlockiv(object, index, GL_UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES, &indicesList[0]);
+                
+                std::unordered_map<std::string, std::pair<GLint, UniformInfo>> nameUniformMap;
+                
+                // now the uniform name for each index
+                for(auto first = std::begin(indicesList); first != std::end(indicesList); ++first)
+                {
+                    const int MAX_CHAR = 100;
+                    std::vector<char> cstr(MAX_CHAR);
+                    GLsizei length = 0;
+                    glGetActiveUniformName(object, *first, MAX_CHAR, &length, &cstr[0]);
+                    
+                    if(0 == length)
+                    {
+                        // an error
+                    }
+                    
+                    std::string uniformName(std::begin(cstr), std::begin(cstr) + length);
+                    
+                    nameUniformMap[uniformName] = std::make_pair(*first, UniformInfo());
+                    
+                }
+                
+                // now get the info for each uniform in the block
+                for(auto &p : nameUniformMap)
+                {
+                    std::pair<GLuint, UniformInfo> indexUIMap = p.second;
+                    glGetActiveUniformsiv(object, 1, &indexUIMap.first, GL_UNIFORM_OFFSET, &indexUIMap.second.uniformOffset);
+                    glGetActiveUniformsiv(object, 1, &indexUIMap.first, GL_UNIFORM_ARRAY_STRIDE, &indexUIMap.second.arrayStride);
+                    glGetActiveUniformsiv(object, 1, &indexUIMap.first, GL_UNIFORM_MATRIX_STRIDE, &indexUIMap.second.matrixStride);
+                    glGetActiveUniformsiv(object, 1, &indexUIMap.first, GL_UNIFORM_TYPE, &indexUIMap.second.uniformType);
+                    p.second = indexUIMap;
+                }
+                
+                iter->second.second.nameUniformMap = nameUniformMap;
+                
+                return blockSize;
+            }
+            
+            void setup_uniform_buffer(UniformBuffer &buffer, std::string blockName, GLuint bindingIndex, GLsizei bufferSize, GLenum usage)
+            {
+                buffer.create(bindingIndex, bufferSize, usage);
+                buffer.set_block_properties(blockName, nameBlockMap[blockName].second.nameUniformMap);
             }
             
         public:
@@ -230,6 +498,7 @@ namespace knu
             void add_vertex_file(std::string fileName)
             {
                 vertexString += read_file(fileName);
+                
             }
             
             void add_vertex_source(std::string vertexSource)
@@ -266,13 +535,13 @@ namespace knu
             {
                 computeString += computeSource;
             }
+            
             void make()
             {
                 // this function assumes strings have been loaded using fragment_shader_from_string etc functions
                 Shader properties;
                 make(properties);
             }
-            
             
             void make(Shader properties)
             {
@@ -292,6 +561,21 @@ namespace knu
                 resolve_uniforms(properties);
                 resolve_attributes(properties);
                 unbind_program();
+                
+            }
+            
+            void uniform_buffer(UniformBuffer &buffer, std::string blockName, GLuint bindingIndex, GLenum usage)
+            {
+                find_block_in_program(blockName);
+                int bufferSize = retrieve_block_info(blockName);
+                setup_uniform_buffer(buffer, blockName, bindingIndex, bufferSize, usage);
+            }
+            
+            void bind_buffer(UniformBuffer const &buffer)
+            {
+                int blockIndex = get_block_index(buffer.block_name());
+                int bindingIndex = buffer.binding_index();
+                glUniformBlockBinding(object, blockIndex, bindingIndex);
             }
             
             void bind_program()
@@ -316,8 +600,6 @@ namespace knu
             {
                 return object;
             }
-            
-            
         };
         
         class UniformBufferObject
@@ -557,6 +839,8 @@ namespace knu
             std::string                                                         bkName;             // nameof the block
             std::unordered_map<std::string, std::pair<GLuint, UniformInfo>>     nameIndexMap;
         };
+        
+
         
     } // namespace gl
 } // namespace knu
