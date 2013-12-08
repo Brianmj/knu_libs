@@ -7,6 +7,7 @@ using namespace knu::math::utility;
 
 void App::general_setup()
 {
+	load_shaders();
 	glEnable(GL_DEPTH_TEST);
 
 }
