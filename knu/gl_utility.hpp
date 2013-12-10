@@ -177,6 +177,7 @@ namespace knu
 				glBindBuffer(GL_UNIFORM_BUFFER, ub);
 				glBufferSubData(GL_UNIFORM_BUFFER, offset, sizeof(float)* 16, &m[0]);
 			}
+
             void do_update(UniformInfo ui, knu::math::m4f const m)
             {
                 int offset = ui.uniformOffset;

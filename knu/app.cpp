@@ -68,6 +68,7 @@ void App::resize(int w, int h)
 {
 	glViewport(0, 0, w, h);
     defaultProjectionMatrix = make_perspective<float>(degrees_to_radians(70.0f), static_cast<float>(w) / h, 0.1f, 100.0f);
+	defaultOrthographicMatrix = make_ortho<float>(0.0f, (float)w, 0.0f, (float)h, 0.01f, 1000.0f);
 }
 
 void App::get_window_size(int &w, int &h)

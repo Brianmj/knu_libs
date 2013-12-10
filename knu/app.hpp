@@ -24,6 +24,7 @@ class App
 	float clearColorVal[4];
 	float clearDepthVal;
     knu::math::m4f defaultProjectionMatrix;
+	knu::math::m4f defaultOrthographicMatrix;
 
 private:
 	void general_setup();

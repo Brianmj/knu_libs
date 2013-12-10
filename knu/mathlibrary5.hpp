@@ -1723,16 +1723,16 @@ namespace knu
 			}
 
 			template <typename T1>
-			Mat4<T1> make_ortho(T1 left, T1 right, T1 bottom, T1 top, T1 near, T1 far)
+			Mat4<T1> make_ortho(T1 left, T1 right, T1 bottom, T1 top, T1 Znear, T1 Zfar)
 			{
 				float tx = -(right + left) / (right - left);
 				float ty = -(top + bottom) / (top - bottom);
-				float tz = -(far + near) / (far - near);
+				float tz = -(Zfar + Znear) / (Zfar - Znear);
 				Mat4<T1> ortho;
 
 				ortho.set_row_0(2 / (right - left), 0, 0, 0);
 				ortho.set_row_1(0, 2 / (top - bottom), 0, 0);
-				ortho.set_row_2(0, 0, -2 / (far - near), 0);
+				ortho.set_row_2(0, 0, -2 / (Zfar - Znear), 0);
 				ortho.set_row_3(tx, ty, tz, 1);
 
 				return ortho;
