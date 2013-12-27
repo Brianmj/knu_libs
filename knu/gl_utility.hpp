@@ -561,7 +561,7 @@ namespace knu
             void make(Shader properties)
             {
                 // If either compute source or path is set, process that only as a compute program can only be in a program by itself
-                if(!properties.computeShaderPath.empty() || !properties.computeSource.empty())
+                if(!properties.computeShaderPath.empty() || !properties.computeSource.empty() || !computeString.empty())
                 {
                     build_compute(properties);
                 }
