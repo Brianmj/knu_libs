@@ -402,19 +402,51 @@ namespace knu
             
             void resolve_uniforms(Shader properties)
             {
-                std::for_each(std::begin(properties.uniforms), std::end(properties.uniforms), [&](std::string u)
-                              {
-                                  uniforms[u] = glGetUniformLocation(object, u.c_str());
-                              });
+				retrieve_active_uniforms();
+				retrieve_active_uniform_blocks();
             }
             
             void resolve_attributes(Shader properties)
             {
+
+				
                 std::for_each(std::begin(properties.attributes), std::end(properties.attributes), [&](std::string a)
                               {
                                   attributes[a] = glGetAttribLocation(object, a.c_str());
                               });
             }
+
+			void retrieve_active_uniforms()
+			{
+				GLint uniformCount;
+				glGetProgramiv(object, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+				const int MAX_CHARS = 256;
+				
+				GLsizei length;
+				GLint size;
+				GLenum type;
+				
+				for (int g = 0; g < uniformCount; ++g)
+				{
+					std::vector<GLchar> un(MAX_CHARS); // uniform name
+					glGetActiveUniform(object, g, MAX_CHARS, &length, &size, &type, &un[0]);
+					std::string str(un.begin(), un.begin() + length);
+					GLint loc = glGetUniformLocation(object, str.c_str());
+					uniforms[str] = loc;
+					un.clear();
+				}
+			}
+
+			void retrieve_active_uniform_blocks()
+			{
+				GLint uniformBlockCount;
+				glGetProgramiv(object, GL_ACTIVE_UNIFORM_BLOCKS, &uniformBlockCount);
+
+				for (int g = 0; g < uniformBlockCount; ++g)
+				{
+				}
+			}
             
             GLint get_block_index(std::string blockName)
             {
