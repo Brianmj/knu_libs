@@ -1828,6 +1828,12 @@ namespace knu
                 if(val1 < val2) return val1;
                 return val2;
             }
+
+			template<typename T1, typename FloatingPointScalar>
+			inline T1 linear_interpolate(T1 a, T1 b, FloatingPointScalar t)
+			{
+				return a + (b - a) * t;
+			}
             
 			template<typename T2>
 			std::ostream &operator <<(std::ostream &os, const Vec2<T2> &v)
