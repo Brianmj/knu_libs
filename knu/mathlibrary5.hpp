@@ -1832,7 +1832,7 @@ namespace knu
 			template<typename T1, typename FloatingPointScalar>
 			inline T1 linear_interpolate(T1 a, T1 b, FloatingPointScalar t)
 			{
-				return a + (b - a) * t;
+				return a + ((b - a) * t);
 			}
             
 			template<typename T2>
