@@ -21,14 +21,14 @@ namespace knu
             knu::math::v4f lightColor;
         };
         
-        struct Desc0
+        struct Light0
         {
             knu::math::v4f lightPosition;
             knu::math::v4f ambientColor;
             knu::math::v4f diffuseColor;
         };
         
-        class LightModel
+        class IlluminationModel
         {
             public:
             static SimpleLight simple_light()
@@ -39,9 +39,9 @@ namespace knu
                 return s;
             }
             
-            static Desc0 light0()
+            static Light0 light0()
             {
-                Desc0 ld0;
+                Light0 ld0;
                 ld0.lightPosition = knu::math::v4f(100.0f, 100.0f, 100.0f, 1.0f);
                 ld0.ambientColor = knu::math::v4f(0.994f, 0.84f, 0.993f, 1.0f);
                 ld0.diffuseColor = knu::math::v4f(0.994f, 0.83f, 0.933f, 1.0f);
