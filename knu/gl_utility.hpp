@@ -408,12 +408,30 @@ namespace knu
             
             void resolve_attributes(Shader properties)
             {
-
+                retrieve_active_attributes();
 				
-                std::for_each(std::begin(properties.attributes), std::end(properties.attributes), [&](std::string a)
-                              {
-                                  attributes[a] = glGetAttribLocation(object, a.c_str());
-                              });
+            }
+            
+            void retrieve_active_attributes()
+            {
+                GLint attributeCount;
+                glGetProgramiv(object, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &attributeCount);
+                
+                for (int k = 0; k < attributeCount; ++k)
+                {
+                    GLint length = 0;
+                    GLint size = 0;
+                    GLenum type = 0;
+                    std::vector<GLchar> name(256);
+                    glGetActiveAttrib(object, k, (GLint)name.size(), &length, &size, &type, &name[0]);
+                    std::string attrib(name.begin(), name.begin() + length);
+                    
+                    if(length != 0)
+                    {
+                        GLint loc = glGetAttribLocation(object, attrib.c_str());
+                        attributes[attrib] = loc;
+                    }
+                }
             }
 
 			void retrieve_active_uniforms()
@@ -433,7 +451,10 @@ namespace knu
 					glGetActiveUniform(object, g, MAX_CHARS, &length, &size, &type, &un[0]);
 					std::string str(un.begin(), un.begin() + length);
 					GLint loc = glGetUniformLocation(object, str.c_str());
-					uniforms[str] = loc;
+                    
+                    // -1 is returned for uniforms in uniform blocks
+                    if(loc != -1)
+                        uniforms[str] = loc;
 					un.clear();
 				}
 			}
@@ -443,8 +464,16 @@ namespace knu
 				GLint uniformBlockCount;
 				glGetProgramiv(object, GL_ACTIVE_UNIFORM_BLOCKS, &uniformBlockCount);
 
+                const int MAX_CHARS = 256;
+                
 				for (int g = 0; g < uniformBlockCount; ++g)
 				{
+                    std::vector<GLchar> un(MAX_CHARS);
+                    GLsizei length;
+                    glGetActiveUniformBlockName(object, g, (GLsizei)un.size(), &length, &un[0]);
+                    std::string bn(un.begin(), un.begin() + length);
+                    find_block_in_program(bn);
+                    retrieve_block_info(bn);
 				}
 			}
             
@@ -639,6 +668,14 @@ namespace knu
             {
                 auto i = uniforms.find(u);
                 if(i != end(uniforms))
+                    return i->second;
+                return -1;
+            }
+            
+            GLint attrib(std::string a)
+            {
+                auto i = attributes.find(a);
+                if(i != end(attributes))
                     return i->second;
                 return -1;
             }
