@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 
 #ifdef __APPLE__
 #include <SDL2_image/SDL_image.h>
@@ -44,8 +45,12 @@ namespace knu
             static unsigned initialized = 0;
             if(!initialized)
             {
-                if(!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG))
-                    throw std::runtime_error("Unable to initialize SDL_Image");
+				if (!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG))
+				{
+					std::string sdlError = IMG_GetError();
+					throw std::runtime_error("Unable to initialize SDL_Image: " + sdlError);
+
+				}
                 initialized = 1;
             }
             
