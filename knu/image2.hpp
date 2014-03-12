@@ -2,6 +2,9 @@
 #define knu_image2
 
 #include <memory>
+#include <vector>
+#include <string>
+
 #define STBI_HEADER_FILE_ONLY
 #include <knu/stb_image.h>
 
