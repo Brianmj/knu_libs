@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-#define STBI_HEADER_FILE_ONLY
+//#define STBI_HEADER_FILE_ONLY
 #include <knu/stb_image.h>
 
 #ifdef __APPLE__

@@ -1328,7 +1328,7 @@ namespace knu
 				Mat4<T1> ret;
 
 				std::transform(std::begin(elements), std::end(elements), std::begin(ret.elements),
-					[](T1 val){
+					[=](T1 val){
 						return (scalar * val);
 				});
 				return ret;
