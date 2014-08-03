@@ -275,6 +275,9 @@ namespace knu
                     std::vector<GLchar> errorMsg(256);
                     GLsizei length;
                     glGetShaderInfoLog(shader, (GLsizei)errorMsg.size(), &length, &errorMsg[0]);
+#ifdef WIN32
+					OutputDebugStringA(std::string(std::begin(errorMsg), std::end(errorMsg)).c_str());
+#endif
                     throw std::runtime_error(std::string(std::begin(errorMsg), std::end(errorMsg)));
                 }
             }
@@ -312,6 +315,9 @@ namespace knu
                     std::vector<GLchar> errorMsg(256);
                     GLsizei length;
                     glGetProgramInfoLog(object, (GLsizei)errorMsg.size(), &length, &errorMsg[0]);
+#ifdef WIN32
+					OutputDebugStringA(std::string(std::begin(errorMsg), std::end(errorMsg)).c_str());
+#endif
                     throw std::runtime_error(std::string(std::begin(errorMsg), std::end(errorMsg)));
                 }
             }
