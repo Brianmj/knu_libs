@@ -14,6 +14,7 @@
 #endif
 
 #ifdef WIN32
+#include <Windows.h>
 #include <GL/glew.h>
 #endif
 
@@ -394,6 +395,10 @@ namespace knu
                     compile_shader(computeShader);
                 }catch(std::runtime_error &e)
                 {
+
+#ifdef WIN32
+					OutputDebugStringA(e.what());
+#endif
                     std::cout << e.what() << std::endl;
                     throw std::runtime_error(std::string("Compute Shader: ") + e.what());
                 }
@@ -436,6 +441,7 @@ namespace knu
 
 			void retrieve_active_uniforms()
 			{
+				glUseProgram(object);
 				GLint uniformCount;
 				glGetProgramiv(object, GL_ACTIVE_UNIFORMS, &uniformCount);
 
