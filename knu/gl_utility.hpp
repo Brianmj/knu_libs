@@ -419,7 +419,7 @@ namespace knu
             
             void resolve_attributes(Shader properties)
             {
-                retrieve_active_attributes();
+                //retrieve_active_attributes();
 				
             }
             

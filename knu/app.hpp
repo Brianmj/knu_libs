@@ -16,7 +16,7 @@
 #define MINOR_VERSION 2         // to request a 3.2 context on mac
 #endif
 
-void APIENTRY debug_output1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, void *userParam);
+void APIENTRY debug_output1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, const void *userParam);
 class App
 {
 	Window window;

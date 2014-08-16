@@ -131,7 +131,7 @@ void App::initialize_graphics()
 	int w, h; window.get_window_size(w, h);	resize(w, h);
 }
 
-void APIENTRY debug_output1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, void *userParam)
+void APIENTRY debug_output1(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, const void *userParam)
 {
 	std::string msg = std::string("source: ") + std::to_string(source) + "\n type: " + std::to_string(type)
 		+ "\n id: " + std::to_string(id) + "\n severity: " + std::to_string(severity)

@@ -63,7 +63,7 @@ namespace knu
 			// the image needs to be flipped vertically because
 			if (i.bytesPerPixel == 4)
 			{
-				i.format = GL_RGBA;
+				i.format = GL_RGBA8;
 				std::vector<RGBA> pixelData((RGBA*)data.get(), ((RGBA*)data.get() + (w * h)));
 				std::vector<RGBA> flippedData(w * h);
 				std::vector<RGBA>::iterator iter = flippedData.begin();
@@ -82,7 +82,7 @@ namespace knu
 			else
 			if (i.bytesPerPixel == 3)
 			{
-				i.format = GL_RGB;
+				i.format = GL_RGB8;
 				std::vector<RGB> pixelData((RGB*)data.get(), ((RGB*)data.get() + (w * h)));
 				std::vector<RGB> flippedData(w * h);
 				std::vector<RGB>::iterator iter = flippedData.begin();
