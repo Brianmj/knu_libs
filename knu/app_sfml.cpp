@@ -6,7 +6,7 @@
 //  Copyright (c) 2015 Brian Jones. All rights reserved.
 //
 
-#include "sfml_app.h"
+#include "app_sfml.hpp"
 #include <iostream>
 
 SfmlApp::SfmlApp():
