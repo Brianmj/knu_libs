@@ -19,16 +19,19 @@
 
 #ifdef WIN32
 #include <GL/glew.h>
+#include <SDL_image.h>
+
+#pragma comment(lib, "sdl2_image.lib")
 #endif
 
 namespace knu
 {
     namespace graphics
     {
-        std::once_flag once;
+        static std::once_flag once;
         
         // just make sure that SDL_Image is initialzed once
-        void initialize_sdl_image()
+        static void initialize_sdl_image()
         {
             if(!IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG))
                 throw std::runtime_error("Unable to initialize SDL Image");
@@ -51,11 +54,11 @@ namespace knu
             
             ~Texture2D(){ glBindTexture(GL_TEXTURE_2D, 0); glDeleteTextures(1, &id); }
             
-            bool load_texture(std::string name, GLuint minFilter, GLuint magFilter, bool mipmapping)
+            bool load_texture(std::string name_, GLuint minFilter, GLuint magFilter, bool mipmapping)
             {
                 std::call_once(once, initialize_sdl_image);
                 
-                std::shared_ptr<SDL_Surface> surface(IMG_Load(name.c_str()), [](SDL_Surface* surf) {SDL_FreeSurface(surf);});
+                std::shared_ptr<SDL_Surface> surface(IMG_Load(name_.c_str()), [](SDL_Surface* surf) {SDL_FreeSurface(surf);});
                 
                 if(!surface)
                     return false;
