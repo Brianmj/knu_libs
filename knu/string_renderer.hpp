@@ -32,7 +32,7 @@ namespace knu
             char                                    charId;
             int                                     xPos;
             int                                     yPos;
-            int                                     width;
+            int          u                           width;
             int                                     height;
             int                                     xOffset;
             int                                     yOffset;
