@@ -44,6 +44,7 @@ namespace knu
             int             height;
             int             bitsPerPixel;
             GLuint          format;
+			GLuint			internalFormat;
             GLuint          id;
             
             Texture2D(): name(), width(0), height(0), bitsPerPixel(0), id(0) {}
@@ -67,21 +68,33 @@ namespace knu
                 height = surface->h;
                 bitsPerPixel = surface->format->BitsPerPixel;
                 
-                if(bitsPerPixel == 32)
-                {
-                    if(surface->format->Rmask == 0x000000ff)
-                        format = GL_RGBA8;
-                    else
-                        format = GL_BGRA;
+				if (bitsPerPixel == 32)
+				{
+					if (surface->format->Rmask == 0x000000ff)
+					{
+						internalFormat = GL_RGBA8;
+						format = GL_RGBA;
+					}
+					else
+					{
+						internalFormat = GL_RGBA8;
+						format = GL_BGRA;
+					}
                     
                 }
                 else
-                    if(bitsPerPixel == 24)
-                    {
-                        if(surface->format->Rmask == 0x0000ff)
-                            format = GL_RGB8;
-                        else
-                            format = GL_BGR;
+					if (bitsPerPixel == 24)
+					{
+						if (surface->format->Rmask == 0x0000ff)
+						{
+							internalFormat = GL_RGB8;
+							format = GL_RGB;
+						}
+						else
+						{
+							internalFormat = GL_RGBA8;
+							format = GL_BGR;
+						}
                     }
                     else
                     {
@@ -92,7 +105,7 @@ namespace knu
 
                 glGenTextures(1, &id);
                 glBindTexture(GL_TEXTURE_2D, id);
-                glTexStorage2D(GL_TEXTURE_2D, 1, (format == 32) ? GL_RGBA8 : GL_RGB8, width, height);
+                glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
                 glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, surface->pixels);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
