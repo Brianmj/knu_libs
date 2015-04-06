@@ -55,6 +55,12 @@ public:
 		}
 	}
 
+	Window(int width, int height, int majorVersion, int minorVersion, bool debug, int depthBits = 24, int stencilBits = 0, unsigned flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL) :
+		Window()
+	{
+		create(width, height, majorVersion, minorVersion, debug, depthBits, stencilBits, flags);
+	}
+
 	~Window()
 	{
 		SDL_GL_MakeCurrent(window, 0);
@@ -103,6 +109,11 @@ public:
         
 
 #ifdef WIN32
+		glewExperimental = true;
+		GLenum val = glewInit();
+		//glDebugMessageCallback(&debug_output1, nullptr);
+		//glEnable(GL_DEBUG_OUTPUT);
+		//glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 		
 	}

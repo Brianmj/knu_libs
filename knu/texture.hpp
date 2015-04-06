@@ -117,6 +117,8 @@ namespace knu
                 
                 return true;
             }
+
+			inline void bind() { glBindTexture(GL_TEXTURE_2D, id); }
         };
     }
 }
