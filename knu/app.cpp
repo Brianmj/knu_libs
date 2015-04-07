@@ -89,8 +89,10 @@ int App::window_height()
 	get_window_size(w, h);
 	return h;
 }
-App::App()
+App::App():
+	window(1024, 768, MAJOR_VERSION, MINOR_VERSION, false, 24, 0)
 {
+	window.set_event_callback(std::bind(&App::process_messages, this, std::placeholders::_1));
 	clearColorVal[0] = 0.1f; clearColorVal[1] = 0.2f; clearColorVal[2] = 0.4f; clearColorVal[3] = 1.0f;
 	clearDepthVal = 1.0f;
 }
@@ -118,12 +120,7 @@ int App::run()
 
 void App::initialize_graphics()
 {
-	window.create(1024, 768, MAJOR_VERSION, MINOR_VERSION, false, 24, 0);
-	window.set_event_callback(std::bind(&App::process_messages, this, std::placeholders::_1));
-    std::cout << glGetString(GL_VERSION) << std::endl;
 #ifdef WIN32
-	glewExperimental = true;
-	GLenum val = glewInit();
 	glDebugMessageCallback(&debug_output1, nullptr);
 	glEnable(GL_DEBUG_OUTPUT);
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);

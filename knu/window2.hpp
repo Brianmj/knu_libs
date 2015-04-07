@@ -111,9 +111,6 @@ public:
 #ifdef WIN32
 		glewExperimental = true;
 		GLenum val = glewInit();
-		//glDebugMessageCallback(&debug_output1, nullptr);
-		//glEnable(GL_DEBUG_OUTPUT);
-		//glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 		
 	}
