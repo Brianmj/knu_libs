@@ -43,6 +43,7 @@ namespace knu
             int             width;
             int             height;
             int             bitsPerPixel;
+			int				bytesPerPixel;
             GLuint          format;
 			GLuint			internalFormat;
             GLuint          id;
@@ -53,7 +54,9 @@ namespace knu
             {if(!load_texture(this->name, minFilter, magFilter, GL_FALSE)) throw (std::runtime_error("Unable to load texture: "
                                                                                                      + name)); }
             
-            ~Texture2D(){ glBindTexture(GL_TEXTURE_2D, 0); glDeleteTextures(1, &id); }
+			~Texture2D() {
+				glBindTexture(GL_TEXTURE_2D, 0); glDeleteTextures(1, &id); 
+			}
             
             bool load_texture(std::string name_, GLuint minFilter, GLuint magFilter, bool mipmapping)
             {
@@ -63,10 +66,20 @@ namespace knu
                 
                 if(!surface)
                     return false;
+
+				// lock surface
+				SDL_LockSurface(surface.get());
                 
                 width = surface->w;
                 height = surface->h;
                 bitsPerPixel = surface->format->BitsPerPixel;
+				bytesPerPixel = surface->format->BytesPerPixel;
+				
+				if (surface->locked)
+				{
+
+				}
+
                 
 				if (bitsPerPixel == 32)
 				{
@@ -103,17 +116,28 @@ namespace knu
                         throw std::runtime_error("Unsupported bytes per pixel");
                     }
 
+
+				int size = width * height * bytesPerPixel;
+				std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(size);
+				memcpy(data.get(), surface->pixels, size);
+
                 glGenTextures(1, &id);
                 glBindTexture(GL_TEXTURE_2D, id);
-                glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, surface->pixels);
+				// For some reason this does not work in window 10 beta drivers!!!! use glTexImage2D
+                //glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
+                //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data.get());
+				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data.get());
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
                 
                 if(mipmapping)
                     glGenerateMipmap(GL_TEXTURE_2D);
+
+				// Release the surface
+				SDL_UnlockSurface(surface.get());
                 
                 return true;
             }
