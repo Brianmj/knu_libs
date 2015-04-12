@@ -149,6 +149,11 @@ public:
         SDL_SetWindowTitle(window, title.c_str());
     }
 
+	void set_swap_val(int val /*0 for immediate refresh, 1 for synchronization with display*/)
+	{
+		SDL_GL_SetSwapInterval(val);
+	}
+
 	void get_window_size(int &width, int &height)
 	{
 		SDL_GetWindowSize(window, &width, &height);
