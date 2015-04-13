@@ -15,6 +15,9 @@
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
+#include <OpenGL/gl3ext.h>
+#include <SDL2/SDL.h>
+#include <SDL2_image/SDL_image.h>
 #endif
 
 #ifdef WIN32
@@ -118,7 +121,7 @@ namespace knu
 
 
 				int size = width * height * bytesPerPixel;
-				std::unique_ptr<unsigned char[]> data = std::make_unique<unsigned char[]>(size);
+                std::unique_ptr<unsigned char[]> data(new unsigned char[size]);
 				memcpy(data.get(), surface->pixels, size);
 
                 glGenTextures(1, &id);
@@ -127,6 +130,11 @@ namespace knu
                 //glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
                 //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data.get());
 				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data.get());
+
+                
+                glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
+                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, surface->pixels);
+
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
