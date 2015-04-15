@@ -52,10 +52,9 @@ namespace knu
             GLuint          id;
             
             Texture2D(): name(), width(0), height(0), bitsPerPixel(0), id(0) {}
-            Texture2D(std::string name): name(name), width(0), height(0), bitsPerPixel(0), id(0) {load_texture(this->name, GL_LINEAR, GL_LINEAR, GL_FALSE);}
+            Texture2D(std::string name): name(name), width(0), height(0), bitsPerPixel(0), id(0) {if(!load_texture(this->name, GL_LINEAR, GL_LINEAR, GL_FALSE)) throw (std::runtime_error("Unable to load texture: " + name)); }
             Texture2D(std::string name, GLuint minFilter, GLuint magFilter): name(name), width(0), height(0), bitsPerPixel(0), id(0)
-            {if(!load_texture(this->name, minFilter, magFilter, GL_FALSE)) throw (std::runtime_error("Unable to load texture: "
-                                                                                                     + name)); }
+            {if(!load_texture(this->name, minFilter, magFilter, GL_FALSE)) throw (std::runtime_error("Unable to load texture: " + name)); }
             
 			~Texture2D() {
 				glBindTexture(GL_TEXTURE_2D, 0); glDeleteTextures(1, &id); 
@@ -129,11 +128,7 @@ namespace knu
 				// For some reason this does not work in window 10 beta drivers!!!! use glTexImage2D
                 //glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
                 //glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, data.get());
-				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data.get());
-
-                
-                glTexStorage2D(GL_TEXTURE_2D, 1, internalFormat, width, height);
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, GL_UNSIGNED_BYTE, surface->pixels);
+                glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data.get());
 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
