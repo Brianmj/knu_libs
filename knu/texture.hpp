@@ -40,8 +40,9 @@ namespace knu
                 throw std::runtime_error("Unable to initialize SDL Image");
         }
         
-        struct Texture2D
+        class Texture2D
         {
+        private:
             std::string     name;
             int             width;
             int             height;
@@ -51,6 +52,7 @@ namespace knu
 			GLuint			internalFormat;
             GLuint          id;
             
+        public:
             Texture2D(): name(), width(0), height(0), bitsPerPixel(0), id(0) {}
             Texture2D(std::string name): name(name), width(0), height(0), bitsPerPixel(0), id(0) {if(!load_texture(this->name, GL_LINEAR, GL_LINEAR, GL_FALSE)) throw (std::runtime_error("Unable to load texture: " + name)); }
             Texture2D(std::string name, GLuint minFilter, GLuint magFilter): name(name), width(0), height(0), bitsPerPixel(0), id(0)
