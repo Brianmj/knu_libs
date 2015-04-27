@@ -1369,12 +1369,12 @@ namespace knu
 				return *this;
 			}
 
-			Mat4<T1>& translate(float x, float y, float z)
+			Mat4<T1>& translate(T1 x, T1 y, T1 z)
 			{
-				set_row_0(Vec4<T1>(1.0f, 0.0f, 0.0f, 0.0f));
-				set_row_1(Vec4<T1>(0.0f, 1.0f, 0.0f, 0.0f));
-				set_row_2(Vec4<T1>(0.0f, 0.0f, 1.0f, 0.0f));
-				set_row_3(Vec4<T1>(x, y, z, 1.0f));
+				set_row_0(Vec4<T1>(T1(1.0f), T1(0.0f), T1(0.0f), T1(0.0f)));
+				set_row_1(Vec4<T1>(T1(0.0f), T1(1.0f), T1(0.0f), T1(0.0f)));
+				set_row_2(Vec4<T1>(T1(0.0f), T1(0.0f), T1(1.0f), T1(0.0f)));
+				set_row_3(Vec4<T1>(x, y, z, T1(1.0f)));
 
 				return *this;
 			}
