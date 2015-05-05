@@ -1492,6 +1492,194 @@ namespace knu
 		public:
 			std::array<T1, MAT_4_4> elements;
 		};
+        
+        template<typename T1>
+        class Quaternion
+        {
+        public:
+            T1 w;
+            knu::math::Vec3<T1> v;
+        public:
+            Quaternion<T1>() { identity(); }
+            Quaternion<T1>(T1 angle, knu::math::Vec3<T1> axis) { axis_angle(angle, axis); }
+            Quaternion<T1>(Quaternion<T1> const &other) : w(other.w), v(other.v) {}
+            
+            Quaternion<T1>& operator=(Quaternion<T1> const &other)
+            {
+                w = other.w;
+                v = other.v;
+                return *this;
+            }
+            
+            Quaternion<T1> &identity()
+            {
+                w = T1(1);
+                v.zero();
+                return *this;
+            }
+            
+            T1 magnitude() const
+            {
+                return sqrt((w * w) + (v.dot(v)));
+            }
+            
+            Quaternion<T1> &conjugate()
+            {
+                v = -v;
+                return *this;
+            }
+            
+            Quaternion<T1> get_conjugate() const
+            {
+                Quaternion<T1> res;
+                res.w = w;
+                res.v = -v;
+                return res;
+            }
+            
+            Quaternion<T1> get_inverse() const
+            {
+                Quaternion<T1> res(get_conjugate());
+                T1 mag = magnitude();
+                
+                res.w /= mag;
+                res.x /= mag;
+                res.y /= mag;
+                res.z /= mag;
+                return res;
+            }
+            
+            T1 get_angle() const
+            {
+                return 2 * acos(w);
+            }
+            
+            void axis_angle(T1 angle, knu::math::Vec3<T1> axis)
+            {
+                angle *= 0.5f;
+                T1 s = sin(angle);
+                T1 c = cos(angle);
+                
+                axis.normalize();
+                v = axis * s;
+                w = c;
+            }
+            
+            Quaternion<T1> multiply(Quaternion<T1> const &other) const
+            {
+                // When mutliplying (adding) the this quaternion is "from" and other is "to"
+                Quaternion<T1> res;
+                res.w = w * other.w - v.dot(other.v);
+                res.v = (other.v * w) + (v * other.w) + v.cross(other.v);	// might have to do other.cross(v)
+                return res;
+            }
+            
+            knu::math::Vec3<T1> multiply(knu::math::Vec3<T1> const &other) const
+            {
+                /*Quaternion<T1> c, p;	// conjugate and point quaternion
+                 c.w = w;
+                 c.v = -v;
+                 
+                 p.w = T1(0);
+                 p.v = other;
+                 
+                 Quaternion<T1> res = c.multiply(p);
+                 res = res.multiply(*this);
+                 
+                 
+                 return res.v;*/
+                
+                // The following code rotates the vec counter-clockwise. The above code rotates clockwise
+                Quaternion<T1> c(get_conjugate()), p;
+                p.w = T1(0);
+                p.v = other;
+                
+                Quaternion<T1> res = p.multiply(c);
+                res = this->multiply(res);
+                
+                return res.v;
+            }
+            
+            Quaternion<T1> difference(Quaternion<T1> const &other) const
+            {
+                return other.multiply(get_conjugate());
+            }
+            
+            T1 dot(Quaternion<T1> const &other) const
+            {
+                return w * other.w + v.x * other.v.x + v.y * other.v.y + v.z * other.v.z;
+            }
+            
+            knu::math::Mat4<T1> to_matrix() const
+            {
+                T1 a = 1 - (2 * v.y * v.y) - (2 * v.z * v.z);
+                T1 b = (2 * v.x * v.y) + (2 * w * v.z);
+                T1 c = (2 * v.x * v.z) - (2 * w * v.y);
+                T1 d = T1(0);
+                T1 e = (2 * v.x * v.y) - (2 * w * v.z);
+                T1 f = 1 - (2 * v.x * v.x) - (2 * v.z * v.z);
+                T1 g = (2 * v.y * v.z) + (2 * w * v.x);
+                T1 h = T1(0);
+                T1 i = (2 * v.x * v.z) + (2 * w * v.y);
+                T1 j = (2 * v.y * v.z) - (2 * w * v.x);
+                T1 k = 1 - (2 * v.x * v.x) - (2 * v.y * v.y);
+                T1 l = T1(0);
+                T1 m = T1(0);
+                T1 n = T1(0);
+                T1 o = T1(0);
+                T1 p = T1(1);
+                
+                return knu::math::Mat4<T1>(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p);
+            }
+        };
+        
+        template<typename T1, typename T2>
+        Quaternion<T1> slerp(Quaternion<T1> from, Quaternion<T1> to, T2 t)
+        {
+            if(t < T2(0))
+                return from;
+            if(t > T2(1))
+                return to;
+            
+            T1 cosOmega = from.w * to.w + from.v.x * to.v.x + from.v.y * to.v.y + from.v.z * to.v.z;
+            
+            if(cosOmega < T1(0))
+            {
+                to.w = -to.w;
+                to.v.x = -to.v.x;
+                to.v.y = -to.v.y;
+                to.v.z = -to.v.z;
+                cosOmega = -cosOmega;
+            }
+            
+            T1 k0, k1;
+            
+            if(cosOmega > T1(0.9999))
+            {
+                k0 = T1(1.0) - T1(t);
+            }else
+            {
+                T1 sinOmega = sqrt(T1(1.0) - cosOmega * cosOmega);
+                
+                T1 omega = atan2(sinOmega, cosOmega);
+                
+                T1 oneOverSineOmega = T1(1) / sinOmega;
+                
+                k0 = sin((T1(1) - T1(t)) * omega) * oneOverSineOmega;
+                k1 = sin(T1(t) * omega) * oneOverSineOmega;
+            }
+            
+            // interpolate
+            Quaternion<T1> res;
+            res.w = from.w * k0 + to.w * k1;
+            res.v.x = from.v.x * k0 + to.v.x * k1;
+            res.v.y = from.v.y * k0 + to.v.y * k1;
+            res.v.z = from.v.z * k0 + to.v.z * k1;
+            
+            return res;
+            
+        }
+
 
 		typedef Vec2<int>		Vector2i;
 		typedef Vec3<int>		Vector3i;
@@ -1540,6 +1728,9 @@ namespace knu
         using   m2d =           Mat2<double>;
         using   m3d =           Mat3<double>;
         using   m4d =           Mat4<double>;
+        
+        using   qf  =           Quaternion<float>;
+        using   qd  =           Quaternion<double>;
 
 
 		// Math math non member functions
