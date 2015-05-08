@@ -1565,6 +1565,18 @@ namespace knu
                 w = c;
             }
             
+            template<typename T2>
+            Quaternion<T1> scalar_multiply(T2 scalar) const
+            {
+                Quaternion<T1> res;
+                res.w = w * scalar;
+                res.v.x = v.x * scalar;
+                res.v.y = v.y * scalar;
+                res.v.z = v.z * scalar;
+                
+                return res;
+            }
+            
             Quaternion<T1> multiply(Quaternion<T1> const &other) const
             {
                 // When mutliplying (adding) the this quaternion is "from" and other is "to"
@@ -1679,7 +1691,6 @@ namespace knu
             return res;
             
         }
-
 
 		typedef Vec2<int>		Vector2i;
 		typedef Vec3<int>		Vector3i;
