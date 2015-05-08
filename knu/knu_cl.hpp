@@ -12,6 +12,10 @@
 #ifdef __APPLE__
 #include <OpenCL/opencl.h>
 #endif
+#ifdef WIN32
+#include <CL/cl.h>
+#pragma comment(lib, "opencl.lib")
+#endif
 
 #include <string>
 #include <vector>
