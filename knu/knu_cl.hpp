@@ -9,7 +9,10 @@
 #ifndef knucl__cl__
 #define knucl__cl__
 
+#ifdef __APPLE__
 #include <OpenCL/opencl.h>
+#endif
+
 #include <string>
 #include <vector>
 
