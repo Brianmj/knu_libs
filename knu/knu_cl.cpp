@@ -217,14 +217,19 @@ namespace knu
             clGetDeviceInfo(devices[deviceIdx], CL_DEVICE_EXTENSIONS, bufferSize, buffer.data(), nullptr);
             std::string deviceExtensions = std::string(std::begin(buffer), std::end(buffer));
             
+            cl_uint maxWorkGroupSize;
+            clGetDeviceInfo(devices[deviceIdx], CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(cl_uint), &maxWorkGroupSize, &bufferSize);
+            
+            cl_uint maxWorkItemSize;
+            clGetDeviceInfo(devices[deviceIdx], CL_DEVICE_MAX_WORK_ITEM_SIZES, sizeof(cl_uint), &maxWorkItemSize, &bufferSize);
+            
             cl_ulong memSize;
             clGetDeviceInfo(devices[deviceIdx], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(cl_ulong), &memSize, &bufferSize);
-            
             
             cl_uint addressBits;
             clGetDeviceInfo(devices[deviceIdx], CL_DEVICE_ADDRESS_BITS, sizeof(cl_uint), &addressBits, &bufferSize);
             
-            ss << deviceName << "\n" << deviceVendor << "\n" << deviceExtensions << "\n" << std::string("Memory Size ") << memSize << "\n" << std::string("Address bits: ") <<  addressBits << "\n";
+            ss << deviceName << "\n" << deviceVendor << "\n" << deviceExtensions << "\n" << std::string("Max work group size: ") << maxWorkGroupSize << "\n" << std::string("Max work item size: ") << maxWorkItemSize << "\n" << std::string("Memory Size ") << memSize << "\n" << std::string("Address bits: ") <<  addressBits << "\n";
             
             std::cout << ss.str() << std::endl;
             return ss.str();
