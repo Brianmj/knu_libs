@@ -224,7 +224,7 @@ namespace knu
             cl_uint addressBits;
             clGetDeviceInfo(devices[deviceIdx], CL_DEVICE_ADDRESS_BITS, sizeof(cl_uint), &addressBits, &bufferSize);
             
-            ss << deviceName << "\n" << deviceVendor << "\n" << deviceExtensions << "\n" << memSize << "\n" << addressBits << "\n";
+            ss << deviceName << "\n" << deviceVendor << "\n" << deviceExtensions << "\n" << std::string("Memory Size ") << memSize << "\n" << std::string("Address bits: ") <<  addressBits << "\n";
             
             std::cout << ss.str() << std::endl;
             return ss.str();
