@@ -1493,6 +1493,7 @@ namespace knu
 			std::array<T1, MAT_4_4> elements;
 		};
         
+         /* say if you have quaternions q60 and q20, and you'd like to "pull the 60 degree quaternion by 20 degrees so you'd have a q80 quaternion, you do q20.multiply(q60) */
         template<typename T1>
         class Quaternion
         {
@@ -1565,18 +1566,6 @@ namespace knu
                 w = c;
             }
             
-            template<typename T2>
-            Quaternion<T1> scalar_multiply(T2 scalar) const
-            {
-                Quaternion<T1> res;
-                res.w = w * scalar;
-                res.v.x = v.x * scalar;
-                res.v.y = v.y * scalar;
-                res.v.z = v.z * scalar;
-                
-                return res;
-            }
-            
             Quaternion<T1> multiply(Quaternion<T1> const &other) const
             {
                 // When mutliplying (adding) the this quaternion is "from" and other is "to"
@@ -1620,6 +1609,41 @@ namespace knu
             T1 dot(Quaternion<T1> const &other) const
             {
                 return w * other.w + v.x * other.v.x + v.y * other.v.y + v.z * other.v.z;
+            }
+            
+            
+            Quaternion<float> exponentiation(float exponent)
+            {
+                Quaternion<float> res;
+                if(fabsf(w) < 1.0f)
+                {
+                    float alpha = acosf(w);
+                    float newAlpha = alpha * exponent;
+                    res.w = cosf(newAlpha);
+                    float multi = sinf(newAlpha) / sinf(alpha);
+                    res.v.x = v.x * multi;
+                    res.v.y = v.y * multi;
+                    res.v.z = v.z * multi;
+                }
+                
+                return res;
+            }
+            
+            Quaternion<double> exponentiation(double exponent)
+            {
+                Quaternion<double> res;
+                if(fabs(w) < 1.0)
+                {
+                    double alpha = acos(w);
+                    double newAlpha = alpha * exponent;
+                    res.w = cos(newAlpha);
+                    double multi = sin(newAlpha) / sin(alpha);
+                    res.v.x = v.x * multi;
+                    res.v.y = v.y * multi;
+                    res.v.z = v.z * multi;
+                }
+                
+                return res;
             }
             
             knu::math::Mat4<T1> to_matrix() const
