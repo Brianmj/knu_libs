@@ -17,13 +17,13 @@ namespace knu
 {
     namespace graphics
     {
-        template<typename Type>
-        class Texture_Manager
+        template<typename type>
+        class texture_manager
         {
-            std::unordered_map<std::string, std::unique_ptr<Type>> stringTextureMap;
+            std::unordered_map<std::string, std::unique_ptr<type>> stringTextureMap;
             
-            Texture_Manager<Type>(const Texture_Manager<Type> &other) = delete;
-            Texture_Manager<Type> &operator=(const Texture_Manager<Type> &other) = delete;
+            texture_manager<type>(const texture_manager<type> &other) = delete;
+            texture_manager<type> &operator=(const texture_manager<type> &other) = delete;
             
         private:
             std::string strip_path_and_extension(std::string fileName)
@@ -53,11 +53,11 @@ namespace knu
                 return name;
             }
         public:
-            Texture_Manager<Type>() {}
+            texture_manager<type>() {}
             
             std::string add(std::string fileName)
             {
-                std::unique_ptr<Type> texture(new Type(fileName));
+                std::unique_ptr<type> texture(new type(fileName));
                 
                 std::string name = strip_path_and_extension(fileName);
                 
@@ -66,7 +66,7 @@ namespace knu
                 return name;
             }
             
-            Type& reference(std::string name)
+            type& reference(std::string name)
             {
                 return *stringTextureMap[name];
             }
