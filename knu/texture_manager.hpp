@@ -20,7 +20,7 @@ namespace knu
         template<typename type>
         class texture_manager
         {
-            std::unordered_map<std::string, std::unique_ptr<type>> stringTextureMap;
+            std::unordered_map<std::string, std::shared_ptr<type>> stringTextureMap;
             
             texture_manager<type>(const texture_manager<type> &other) = delete;
             texture_manager<type> &operator=(const texture_manager<type> &other) = delete;
@@ -55,13 +55,13 @@ namespace knu
         public:
             texture_manager<type>() {}
             
-            std::string add(std::string fileName)
+            std::string add(std::string file_name)
             {
-                std::unique_ptr<type> texture(new type(fileName));
+				std::shared_ptr<type> texture = std::make_shared<type>(file_name);
                 
-                std::string name = strip_path_and_extension(fileName);
+                std::string name = strip_path_and_extension(file_name);
                 
-                stringTextureMap[name] = std::move(texture);
+                stringTextureMap[name] = (texture);
                 
                 return name;
             }

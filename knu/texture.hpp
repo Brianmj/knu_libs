@@ -32,24 +32,24 @@ namespace knu
 {
     namespace graphics
     {
-        class Texture2D
+        class texture2d
         {
         private:
             GLuint          id;
             
         public:
-            Texture2D(): id(0) {glGenTextures(1, &id);}
-            Texture2D(std::string name): id(0) {glGenTextures(1, &id); if(!load_texture(name, GL_LINEAR, GL_LINEAR, GL_FALSE)) throw (std::runtime_error("Unable to load texture: " + name)); }
-            Texture2D(std::string name, GLuint minFilter, GLuint magFilter): id(0)
+            texture2d(): id(0) {glGenTextures(1, &id);}
+            texture2d(std::string name): id(0) {glGenTextures(1, &id); if(!load_texture(name, GL_LINEAR, GL_LINEAR, GL_FALSE)) throw (std::runtime_error("Unable to load texture: " + name)); }
+            texture2d(std::string name, GLuint minFilter, GLuint magFilter): id(0)
             {glGenTextures(1, &id); if(!load_texture(name, minFilter, magFilter, GL_FALSE)) throw (std::runtime_error("Unable to load texture: " + name)); }
             
-			~Texture2D() {
+			~texture2d() {
 				glBindTexture(GL_TEXTURE_2D, 0); glDeleteTextures(1, &id); 
 			}
             
             bool load_texture(std::string name_, GLuint minFilter, GLuint magFilter, bool mipmapping)
             {
-                knu::graphics::Image img;
+                knu::graphics::image img;
                 img.load_image(name_);
                 
                 glBindTexture(GL_TEXTURE_2D, id);

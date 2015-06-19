@@ -18,7 +18,6 @@
 
 #ifdef WIN32
 #include <SDL_image.h>
-
 #pragma comment(lib, "sdl2_image.lib")
 #endif
 
@@ -35,7 +34,7 @@ namespace knu
                 throw std::runtime_error("Unable to initialize SDL Image");
         }
         
-        class Image
+        class image
         {
             int width;
             int height;
@@ -122,9 +121,7 @@ namespace knu
             unsigned int get_internal_format() {return internalFormat;}
             int get_size() {return imageSize;}
             unsigned char *get_data() { return imageData.get();}
-
         };
-
     }
 }
 
