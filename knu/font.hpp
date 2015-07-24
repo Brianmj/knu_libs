@@ -276,7 +276,7 @@ namespace knu
 			AngelCodeBitmapLoader loader;
 
 		public:
-			knu::graphics::Texture2D texture;
+			knu::graphics::texture2d texture;
 
 		public:
 			Font() : loader() {}

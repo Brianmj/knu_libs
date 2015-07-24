@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <map>
 #include <knu/mathlibrary5.hpp>
 
 #ifdef __APPLE__
@@ -44,6 +45,8 @@ namespace knu
         private:
 			
         };
+        
+        void remove_sprite(sprite *s);
 
 		static std::shared_ptr<sprite> create_sprite(int width, int height)
 		{
@@ -102,17 +105,34 @@ namespace knu
 			glEnableVertexAttribArray(1);
 			glBindVertexArray(0);
 
-			auto s = std::make_shared<sprite>(width, height);
+            auto s = std::shared_ptr<sprite>(new sprite(), remove_sprite);
+            s->width = width;
+            s->height = height;
 			s->vbo = vbo;
 			s->vao = vao;
-			return s;
+            return s;
 
 		}
-		inline void remove_sprite(sprite &s)
+        
+		inline void remove_sprite(sprite *s)
 		{
-			glDeleteVertexArrays(1, &s.vao);
-			glDeleteBuffers(1, &s.vbo);
+			glDeleteVertexArrays(1, &s->vao);
+			glDeleteBuffers(1, &s->vbo);
+            delete s;
 		}
+        
+        class sprite_manager
+        {
+            using string_sprite_map_type = std::map<std::string, std::shared_ptr<sprite>>;
+            std::map<std::string, std::shared_ptr<sprite>> string_sprite_map;
+        public:
+            void add(std::string name, int width, int height)
+            {
+                string_sprite_map[name] = create_sprite(width, height);
+            }
+            
+            std::shared_ptr<sprite> reference(std::string name) {return string_sprite_map[name];}
+        };
     }
 }
 #endif
