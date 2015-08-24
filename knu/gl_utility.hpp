@@ -134,6 +134,30 @@ namespace knu
                 glAttachShader(p_obj, v_shader);
                 glDeleteShader(v_shader);
             }
+
+			void build_compute()
+			{
+				if (c_string_src.empty())
+					throw std::runtime_error("no compute shader");
+
+				c_shader = glCreateShader(GL_COMPUTE_SHADER);
+				const char *source = c_string_src.c_str();
+				GLint length = (GLint)c_string_src.size();
+				glShaderSource(c_shader, 1, &source, &length);
+
+				try
+				{
+					compile_shader(c_shader);
+				}
+				catch (std::runtime_error &e)
+				{
+					std::cout << e.what() << std::endl;
+					throw std::runtime_error(std::string("Compute Shader: ") + e.what());
+				}
+
+				glAttachShader(p_obj, c_shader);
+				glDeleteShader(c_shader);
+			}
             
             void build_program()
             {
@@ -141,7 +165,7 @@ namespace knu
                 
                 if(!c_string_src.empty())
                 {
-                    //glAttachShader(object, computeShader);
+					build_compute();
                 }
                 else
                 {
@@ -201,6 +225,11 @@ namespace knu
             {
                 v_string_src = read_file(file_name);
             }
+
+			void add_compute_file(std::string file_name)
+			{
+				c_string_src = read_file(file_name);
+			}
             
             void build()
             {
@@ -222,6 +251,18 @@ namespace knu
                 
                 return i->second;
             }
+
+			void vector(std::string uniform_name, knu::math::v3f v)
+			{
+				GLuint id = uniform(uniform_name);
+				glProgramUniform3fv(p_obj, id, 1, &v.x);
+			}
+
+			void vector(std::string uniform_name, knu::math::v4f v)
+			{
+				GLuint id = uniform(uniform_name);
+				glProgramUniform4f(p_obj, id, v.x, v.y, v.z, v.w);
+			}
         };
         
         template<typename t>
